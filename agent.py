@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from strands import Agent
 
 app = FastAPI(title="Strands Agent Server", version="1.0.0")
@@ -15,7 +15,14 @@ class InvocationRequest(BaseModel):
 class InvocationResponse(BaseModel):
     output: Dict[str, Any]
 
-@app.post("/invocations", response_model=InvocationResponse)
+@app.post(
+    "/invocations",
+    response_model=InvocationResponse,
+    responses={
+        400: {"description": "input 에 prompt 가 없다"},
+        500: {"description": "에이전트 처리 중 오류"},
+    },
+)
 async def invoke_agent(request: InvocationRequest):
     try:
         user_message = request.input.get("prompt", "")
@@ -28,7 +35,7 @@ async def invoke_agent(request: InvocationRequest):
         result = strands_agent(user_message)
         response = {
             "message": result.message,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "model": "strands-agent",
         }
 
@@ -43,4 +50,4 @@ async def ping():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="127.0.0.1", port=8080)
