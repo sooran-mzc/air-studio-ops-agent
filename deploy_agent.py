@@ -1,6 +1,8 @@
+import os
+
 import boto3
 
-client = boto3.client("bedrock-agentcore-control", region_name="us-west-2")
+client = boto3.client("bedrock-agentcore-control", region_name=os.environ.get("AWS_REGION", "us-west-2"))
 
 response = client.create_agent_runtime(
     agentRuntimeName="strands_agent",

@@ -1,8 +1,9 @@
 import json
+import os
 
 import boto3
 
-agent_core_client = boto3.client("bedrock-agentcore", region_name="us-west-2")
+agent_core_client = boto3.client("bedrock-agentcore", region_name=os.environ.get("AWS_REGION", "us-west-2"))
 payload = json.dumps({"input": {"prompt": "チ。という漫画について魅力を教えて"}})
 
 response = agent_core_client.invoke_agent_runtime(
